@@ -4,6 +4,15 @@ from schema import ProductCreate
 
 app = FastAPI()
 
+@app.get("/products",status_code=status.HTTP_200_OK)
+async def getProducts():
+    try:
+        products = Products.query.all()
+        response = {"products": products}
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to retrieve products: {e}")
+
 @app.post("/products",status_code=status.HTTP_201_CREATED)
 async def newProduct(product_data: ProductCreate):
     try:
@@ -28,34 +37,3 @@ async def newProduct(product_data: ProductCreate):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to create product: {e}")
 
-    
-
-
-
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
-
-
-# @app.get("/productos")
-# def obtener_productos():
-    
-#     sesion = Session()
-    
-    
-#     productos_db = sesion.query(Productos).all()
-    
-    
-#     sesion.close()
-    
-  
-#     lista_resultado = []
-#     for producto in productos_db:
-#         lista_resultado.append({
-#             "id": producto.id,
-#             "nombre": producto.nombre,
-#             "precio": producto.precio
-#         })
-        
-   
-#     return lista_resultado
