@@ -10,8 +10,27 @@ async def getProducts():
         products = Products.query.all()
         response = {"products": products}
         return response
+    
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to retrieve products: {e}")
+
+@app.get("/products/{product_id}",status_code=status.HTTP_200_OK)
+async def getProductId(product_id: int):
+    try:
+        product = Products.query.get(product_id)
+
+        if not product:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+        response = {"product:": product}
+        return response
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to get product with id {product_id}: {e}")    
+
+
 
 @app.post("/products",status_code=status.HTTP_201_CREATED)
 async def newProduct(product_data: ProductCreate):
