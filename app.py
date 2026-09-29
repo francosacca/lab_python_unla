@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status, HTTPException
 from database import db_session, Products
-from schema import ProductCreate
+from schema import ProductCreate,ProductResponse
 
 app = FastAPI()
 
@@ -32,7 +32,7 @@ async def getProductId(product_id: int):
 
 
 
-@app.post("/products",status_code=status.HTTP_201_CREATED)
+@app.post("/products",status_code=status.HTTP_201_CREATED,response_model=ProductResponse)
 async def newProduct(product_data: ProductCreate):
     try:
         product = Products.query.filter_by(name=product_data.name).first()
@@ -49,8 +49,29 @@ async def newProduct(product_data: ProductCreate):
         db_session.commit()
         db_session.refresh(product)
         
-        response = {"product": product}
-        return response
+        return product
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to create product: {e}")
+
+@app.put("/products{product_id}",status_code=status.HTTP_200_OK,response_model=ProductResponse)
+async def productMod(product_id: int, product_data: ProductCreate):
+    try:
+        product = Products.query.get(product_id)
+        
+        if not product:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+        product.name = product_data.name
+        product.price = product_data.price
+
+        db_session.commit()
+        db_session.refresh(product)
+
+        return product
+
     except HTTPException:
         raise
     except Exception as e:
