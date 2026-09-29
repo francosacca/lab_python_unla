@@ -56,7 +56,7 @@ async def newProduct(product_data: ProductCreate):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to create product: {e}")
 
-@app.put("/products{product_id}",status_code=status.HTTP_200_OK,response_model=ProductResponse)
+@app.put("/products/{product_id}",status_code=status.HTTP_200_OK,response_model=ProductResponse)
 async def productMod(product_id: int, product_data: ProductCreate):
     try:
         product = Products.query.get(product_id)
@@ -75,5 +75,24 @@ async def productMod(product_id: int, product_data: ProductCreate):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to create product: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to update product: {e}")
+
+@app.delete("/products/{product_id}",status_code=status.HTTP_204_NO_CONTENT)
+async def productDelete(product_id: int):
+    try:
+        product = Products.query.get(product_id)
+
+        if not product:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+        db_session.delete(product)
+        db_session.commit()
+
+        return
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while trying to delete product: {e}")
+
 
